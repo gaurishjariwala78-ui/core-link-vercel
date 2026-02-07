@@ -61,7 +61,7 @@ const CTASection = () => {
                 className="group w-full sm:w-auto"
                 onClick={() =>
                   window.open(
-                    "https://wa.me/919876543210?text=Hello%20Coreelink%20%F0%9F%91%8B%0AI%20visited%20your%20website%20and%20would%20like%20to%20book%20a%20Free%20Strategy%20Call.%0APlease%20share%20available%20time%20slots.",
+                    "https://wa.me/918141085418?text=Hello%20Coreelink%20%F0%9F%91%8B%0AI%20visited%20your%20website%20and%20would%20like%20to%20book%20a%20Free%20Strategy%20Call.%0APlease%20share%20available%20time%20slots.",
                     "_blank",
                   )
                 }
