@@ -92,7 +92,7 @@ const services = [
 ];
 
 const openWhatsApp = (serviceName: string) => {
-  const message = `Hello Coreelink 👋
+  const message = `Hello Corelink 👋
 I am interested in your *${serviceName}* service.`;
 
   const encodedMessage = encodeURIComponent(message);
