@@ -83,7 +83,7 @@ const Header = () => {
               size="default"
               onClick={() =>
                 window.open(
-                  "https://wa.me/918141085418?text=Hello%20Coreelink,%20I%20would%20like%20to%20book%20a%20Free%20Strategy%20Call",
+                  "https://wa.me/918141085418?text=Hello%20Corelink,%20I%20would%20like%20to%20book%20a%20Free%20Strategy%20Call",
                   "_blank",
                 )
               }
