@@ -13,9 +13,11 @@ const projects = [
     id: 1,
     title: "Luxury Fashion Brand",
     category: "Social Media",
-    description: "Complete social media transformation resulting in 400% follower growth.",
+    description:
+      "Complete social media transformation resulting in 400% follower growth.",
     result: "+400% Followers",
-    image: "https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?w=800&q=80",
+    image:
+      "https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?w=800&q=80",
   },
   {
     id: 2,
@@ -23,15 +25,18 @@ const projects = [
     category: "Paid Ads",
     description: "Strategic ad campaigns that generated 2000+ qualified leads.",
     result: "2000+ Leads",
-    image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&q=80",
+    image:
+      "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&q=80",
   },
   {
     id: 3,
     title: "Personal Brand - CEO",
     category: "Branding",
-    description: "Built thought leadership presence reaching 500K+ monthly impressions.",
+    description:
+      "Built thought leadership presence reaching 500K+ monthly impressions.",
     result: "500K+ Reach",
-    image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&q=80",
+    image:
+      "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&q=80",
   },
   {
     id: 4,
@@ -39,7 +44,8 @@ const projects = [
     category: "Paid Ads",
     description: "ROAS-focused campaigns driving 10x return on ad spend.",
     result: "10x ROAS",
-    image: "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800&q=80",
+    image:
+      "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800&q=80",
   },
   {
     id: 5,
@@ -47,7 +53,8 @@ const projects = [
     category: "Content",
     description: "Viral reels strategy generating millions of views monthly.",
     result: "5M+ Views",
-    image: "https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=800&q=80",
+    image:
+      "https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=800&q=80",
   },
   {
     id: 6,
@@ -55,7 +62,8 @@ const projects = [
     category: "Branding",
     description: "Complete brand overhaul increasing conversions by 150%.",
     result: "+150% Conversions",
-    image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&q=80",
+    image:
+      "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&q=80",
   },
 ];
 
@@ -202,7 +210,17 @@ const Portfolio = () => {
                 Your brand could be our next success story. Let's talk about
                 your goals.
               </p>
-              <Button variant="hero" size="lg" className="group">
+              <Button
+                variant="hero"
+                size="lg"
+                className="group"
+                onClick={() =>
+                  window.open(
+                    "https://wa.me/918141085418?text=Hello%20Corelink%20%F0%9F%91%8B%0AI%20want%20to%20start%20a%20project%20with%20you.%20Please%20share%20details%20about%20process,%20pricing,%20and%20timeline.",
+                    "_blank",
+                  )
+                }
+              >
                 Start Your Project
                 <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
               </Button>

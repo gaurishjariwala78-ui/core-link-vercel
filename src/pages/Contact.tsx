@@ -24,7 +24,7 @@ const Contact = () => {
     e.preventDefault();
     setIsSubmitting(true);
 
-    const whatsappMessage = `Hello Coreelink 👋
+    const whatsappMessage = `Hello Corelink 👋
 
 📌 *New Enquiry from Website*
 
