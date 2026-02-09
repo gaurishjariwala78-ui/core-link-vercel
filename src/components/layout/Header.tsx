@@ -44,7 +44,7 @@ const Header = () => {
           </Link> */}
           <Link to="/" className="flex items-center gap-2 shrink-0">
             <motion.img
-              src="/o.png"
+              src="/o-2.png"
               alt="Coreelink Logo"
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
