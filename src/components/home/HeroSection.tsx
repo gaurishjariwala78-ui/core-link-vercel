@@ -115,9 +115,9 @@ const HeroSection = () => {
             className="mt-12 sm:mt-16 md:mt-20 grid grid-cols-3 gap-4 sm:gap-8 max-w-lg mx-auto"
           >
             {[
-              { value: "50+", label: "Clients" },
-              { value: "2M+", label: "Reach" },
-              { value: "300%", label: "Growth" },
+              // { value: "50+", label: "Clients" },
+              // { value: "2M+", label: "Reach" },
+              // { value: "300%", label: "Growth" },
             ].map((stat, index) => (
               <div key={index} className="text-center">
                 <div className="text-2xl sm:text-3xl md:text-4xl font-heading font-bold gradient-text">
