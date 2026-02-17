@@ -5,7 +5,7 @@ import AboutSection from "@/components/home/AboutSection";
 import ServicesSection from "@/components/home/ServicesSection";
 import WhyChooseSection from "@/components/home/WhyChooseSection";
 import CTASection from "@/components/home/CTASection";
-import BrandsSection from "@/components/home/Brandsection";
+import BrandsSection from "@/components/home/BrandSection";
 
 const Index = () => {
   return (
