@@ -4,7 +4,7 @@ import { useEffect, useState, useRef } from "react";
 const LETTERS = ["C", "O", "R", "E", "L", "I", "N", "K"];
 const O_INDEX = 1;
 
-// ── Timing (ms) — tightened for speed ────────────────────────────────
+// ── Timing (ms) ───────────────────────────────────────────────────────
 const LETTER_IN_STAGGER = 80;
 const LETTER_IN_DUR = 380;
 const HOLD = 700;
@@ -27,27 +27,55 @@ const finishTime = oZoomStart + O_ZOOM_DUR + FINISH_OFFSET;
 
 type Phase = "in" | "hold" | "out" | "center" | "zoom";
 
+// ── Font size: computed once from container width so every device
+//    renders the same proportional size relative to the word block ──
+function useFontSize() {
+  const [size, setSize] = useState(64);
+
+  useEffect(() => {
+    const calc = () => {
+      const vw = window.innerWidth;
+      // We want the 8-letter word to fill ~85% of screen width.
+      // Bebas Neue: each char ≈ 0.58× fontSize wide, letterSpacing 0.05em adds ~0.05× per char.
+      // Total word width ≈ 8 × fontSize × (0.58 + 0.05) = 8 × 0.63 × fontSize
+      // Solve: 8 × 0.63 × fontSize = 0.85 × vw
+      // fontSize = (0.85 × vw) / (8 × 0.63)
+      const raw = (0.85 * vw) / (8 * 0.63);
+      // Clamp: min 36px (tiny phones), max 140px (wide desktops)
+      setSize(Math.min(140, Math.max(36, raw)));
+    };
+    calc();
+    window.addEventListener("resize", calc);
+    return () => window.removeEventListener("resize", calc);
+  }, []);
+
+  return size;
+}
+
 export default function SplashScreen({ onFinish }: { onFinish: () => void }) {
   const [phase, setPhase] = useState<Phase>("in");
   const oRef = useRef<HTMLSpanElement>(null);
   const [oOffset, setOOffset] = useState(0);
+  const fontSize = useFontSize();
 
+  // Measure O's real distance from screen center
   useEffect(() => {
     const measure = () => {
       if (oRef.current) {
         const rect = oRef.current.getBoundingClientRect();
         const oCenter = rect.left + rect.width / 2;
-        const screenCenter = window.innerWidth / 2;
-        setOOffset(screenCenter - oCenter);
+        const scrCenter = window.innerWidth / 2;
+        setOOffset(scrCenter - oCenter);
       }
     };
+    // Re-measure whenever fontSize settles (next frame)
     const id = requestAnimationFrame(measure);
     window.addEventListener("resize", measure);
     return () => {
       cancelAnimationFrame(id);
       window.removeEventListener("resize", measure);
     };
-  }, []);
+  }, [fontSize]); // re-run when font size changes
 
   useEffect(() => {
     const t = [
@@ -65,7 +93,7 @@ export default function SplashScreen({ onFinish }: { onFinish: () => void }) {
       className="fixed inset-0 z-[9999] flex items-center justify-center overflow-hidden"
       style={{ backgroundColor: "#FFFFFF" }}
     >
-      {/* Subtle grain */}
+      {/* Grain */}
       <div
         className="absolute inset-0 pointer-events-none z-[1]"
         style={{
@@ -75,7 +103,7 @@ export default function SplashScreen({ onFinish }: { onFinish: () => void }) {
         }}
       />
 
-      {/* Ambient yellow glow — softer on white */}
+      {/* Ambient yellow glow */}
       <motion.div
         className="absolute rounded-full pointer-events-none z-[2]"
         style={{
@@ -97,8 +125,11 @@ export default function SplashScreen({ onFinish }: { onFinish: () => void }) {
         transition={{ duration: 0.9 }}
       />
 
-      {/* ── Letter row ── */}
-      <div className="relative z-[20] flex items-center select-none">
+      {/* ── Letter row — all 8 letters, same font size, same font ── */}
+      <div
+        className="relative z-[20] flex items-center select-none"
+        // No padding/gap — letterSpacing handles spacing inside each span
+      >
         {LETTERS.map((char, i) => {
           const isO = i === O_INDEX;
           const reverseI = LETTERS.length - 1 - i;
@@ -111,6 +142,7 @@ export default function SplashScreen({ onFinish }: { onFinish: () => void }) {
                 phase={phase}
                 oOffset={oOffset}
                 inDelay={i * LETTER_IN_STAGGER}
+                fontSize={fontSize}
               />
             );
           }
@@ -121,19 +153,20 @@ export default function SplashScreen({ onFinish }: { onFinish: () => void }) {
               phase={phase}
               inDelay={i * LETTER_IN_STAGGER}
               outDelay={reverseI * LETTER_OUT_STAGGER}
+              fontSize={fontSize}
             />
           );
         })}
       </div>
 
-      {/* Tagline */}
+      {/* Tagline — scales with fontSize too */}
       <motion.p
         className="absolute pointer-events-none z-[20]"
         style={{
-          bottom: "11%",
+          bottom: "10%",
           fontFamily: "'Barlow Condensed', 'Arial Narrow', sans-serif",
-          fontSize: "clamp(9px, 1vw, 11px)",
-          letterSpacing: "0.5em",
+          fontSize: Math.max(9, fontSize * 0.09),
+          letterSpacing: "0.45em",
           color: "#000",
           textTransform: "uppercase",
         }}
@@ -149,24 +182,22 @@ export default function SplashScreen({ onFinish }: { onFinish: () => void }) {
         PREMIUM SOCIAL MEDIA MARKETING
       </motion.p>
 
-      {/* ── White flood fill — zooms out from center with O, merges seamlessly ── */}
-      {/* This white circle expands alongside the O zoom so the transition into  */}
-      {/* the (white-bg) main page is completely invisible — no flash, no cut.   */}
+      {/* Yellow flood from O position */}
       <motion.div
         className="absolute rounded-full pointer-events-none z-[40]"
         style={{
-          width: "clamp(68px, 11vw, 128px)",
-          height: "clamp(68px, 11vw, 128px)",
+          width: fontSize,
+          height: fontSize,
           backgroundColor: "#FACC15",
         }}
         initial={{ scale: 0, opacity: 0 }}
         animate={
           phase === "zoom"
             ? {
-                scale: 60,
+                scale: 70,
                 opacity: 1,
                 transition: {
-                  duration: (O_ZOOM_DUR / 1000) * 0.7,
+                  duration: (O_ZOOM_DUR / 1000) * 0.68,
                   ease: [0.6, 0, 0.2, 1],
                 },
               }
@@ -174,7 +205,7 @@ export default function SplashScreen({ onFinish }: { onFinish: () => void }) {
         }
       />
 
-      {/* White wash that fades in gently OVER the yellow — smooth page entry */}
+      {/* White wash — seamless merge into main page */}
       <motion.div
         className="absolute inset-0 z-[45] pointer-events-none"
         style={{ backgroundColor: "#FFFFFF" }}
@@ -197,18 +228,32 @@ export default function SplashScreen({ onFinish }: { onFinish: () => void }) {
 }
 
 /* ─────────────────────────────────────────────────────────────────────
-   O — stays in flex row, slides to center, then zooms
+   Shared style — guarantees identical rendering for O and non-O
+───────────────────────────────────────────────────────────────────── */
+const SHARED_STYLE = (fontSize: number): React.CSSProperties => ({
+  fontFamily: "'Bebas Neue', 'Impact', 'Arial Black', sans-serif",
+  fontSize: fontSize, // JS pixel value — same on every device
+  lineHeight: 1,
+  fontWeight: 400,
+  letterSpacing: "0.05em",
+  display: "inline-block",
+});
+
+/* ─────────────────────────────────────────────────────────────────────
+   O Letter
 ───────────────────────────────────────────────────────────────────── */
 function OLetter({
   oRef,
   phase,
   oOffset,
   inDelay,
+  fontSize,
 }: {
   oRef: React.RefObject<HTMLSpanElement>;
   phase: Phase;
   oOffset: number;
   inDelay: number;
+  fontSize: number;
 }) {
   const getAnimate = (): object => {
     if (phase === "in")
@@ -263,12 +308,7 @@ function OLetter({
       initial={{ opacity: 0, x: 0, y: 75, scale: 0.4, filter: "blur(16px)" }}
       animate={getAnimate()}
       style={{
-        fontFamily: "'Bebas Neue', 'Impact', 'Arial Black', sans-serif",
-        fontSize: "clamp(68px, 11vw, 128px)",
-        lineHeight: 1,
-        fontWeight: 400,
-        letterSpacing: "0.05em",
-        display: "inline-block",
+        ...SHARED_STYLE(fontSize),
         color: "#FACC15",
         textShadow: glowByPhase[phase],
         zIndex: 30,
@@ -280,18 +320,20 @@ function OLetter({
 }
 
 /* ─────────────────────────────────────────────────────────────────────
-   Non-O letters — BLACK on white, exit upward in reverse stagger
+   Non-O Letters
 ───────────────────────────────────────────────────────────────────── */
 function NonOLetter({
   char,
   phase,
   inDelay,
   outDelay,
+  fontSize,
 }: {
   char: string;
   phase: Phase;
   inDelay: number;
   outDelay: number;
+  fontSize: number;
 }) {
   const getAnimate = (): object => {
     if (phase === "in")
@@ -326,12 +368,7 @@ function NonOLetter({
       initial={{ opacity: 0, y: 75, scale: 0.4, filter: "blur(16px)" }}
       animate={getAnimate()}
       style={{
-        fontFamily: "'Bebas Neue', 'Impact', 'Arial Black', sans-serif",
-        fontSize: "clamp(68px, 11vw, 128px)",
-        lineHeight: 1,
-        fontWeight: 400,
-        letterSpacing: "0.05em",
-        display: "inline-block",
+        ...SHARED_STYLE(fontSize),
         color: "#000000",
       }}
     >
