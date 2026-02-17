@@ -27,39 +27,61 @@ const finishTime = oZoomStart + O_ZOOM_DUR + FINISH_OFFSET;
 
 type Phase = "in" | "hold" | "out" | "center" | "zoom";
 
-// ── Font size: computed once from container width so every device
-//    renders the same proportional size relative to the word block ──
+// ── Inject Google Font directly so it always loads regardless of _document.tsx ──
+function useInjectFont() {
+  useEffect(() => {
+    const id = "bebas-neue-font";
+    if (document.getElementById(id)) return;
+    const link = document.createElement("link");
+    link.id = id;
+    link.rel = "stylesheet";
+    link.href =
+      "https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap";
+    document.head.appendChild(link);
+  }, []);
+}
+
+// ── Font size: fills 88% of screen width across all devices ──
 function useFontSize() {
   const [size, setSize] = useState(64);
-
   useEffect(() => {
     const calc = () => {
       const vw = window.innerWidth;
-      // We want the 8-letter word to fill ~85% of screen width.
-      // Bebas Neue: each char ≈ 0.58× fontSize wide, letterSpacing 0.05em adds ~0.05× per char.
-      // Total word width ≈ 8 × fontSize × (0.58 + 0.05) = 8 × 0.63 × fontSize
-      // Solve: 8 × 0.63 × fontSize = 0.85 × vw
-      // fontSize = (0.85 × vw) / (8 × 0.63)
-      const raw = (0.85 * vw) / (8 * 0.63);
-      // Clamp: min 36px (tiny phones), max 140px (wide desktops)
-      setSize(Math.min(140, Math.max(36, raw)));
+      // Bebas Neue: char width ≈ 0.6× fontSize, letterSpacing 0.05em ≈ 0.05×
+      // 8 letters × (0.6 + 0.05) × fontSize = 0.88 × vw
+      const raw = (0.88 * vw) / (8 * 0.65);
+      setSize(Math.min(150, Math.max(38, raw)));
     };
     calc();
     window.addEventListener("resize", calc);
     return () => window.removeEventListener("resize", calc);
   }, []);
-
   return size;
 }
 
 export default function SplashScreen({ onFinish }: { onFinish: () => void }) {
   const [phase, setPhase] = useState<Phase>("in");
+  const [fontReady, setFontReady] = useState(false);
   const oRef = useRef<HTMLSpanElement>(null);
   const [oOffset, setOOffset] = useState(0);
   const fontSize = useFontSize();
 
+  useInjectFont();
+
+  // Wait for Bebas Neue to actually load before starting animation
+  useEffect(() => {
+    if ("fonts" in document) {
+      document.fonts.load(`1em 'Bebas Neue'`).then(() => setFontReady(true));
+    } else {
+      // Fallback: short delay for older browsers
+      const t = setTimeout(() => setFontReady(true), 300);
+      return () => clearTimeout(t);
+    }
+  }, []);
+
   // Measure O's real distance from screen center
   useEffect(() => {
+    if (!fontReady) return;
     const measure = () => {
       if (oRef.current) {
         const rect = oRef.current.getBoundingClientRect();
@@ -68,16 +90,17 @@ export default function SplashScreen({ onFinish }: { onFinish: () => void }) {
         setOOffset(scrCenter - oCenter);
       }
     };
-    // Re-measure whenever fontSize settles (next frame)
     const id = requestAnimationFrame(measure);
     window.addEventListener("resize", measure);
     return () => {
       cancelAnimationFrame(id);
       window.removeEventListener("resize", measure);
     };
-  }, [fontSize]); // re-run when font size changes
+  }, [fontSize, fontReady]);
 
+  // Only start timers once font is ready — no jank on first frame
   useEffect(() => {
+    if (!fontReady) return;
     const t = [
       setTimeout(() => setPhase("hold"), allInTime),
       setTimeout(() => setPhase("out"), allOutStart),
@@ -86,88 +109,77 @@ export default function SplashScreen({ onFinish }: { onFinish: () => void }) {
       setTimeout(() => onFinish(), finishTime),
     ];
     return () => t.forEach(clearTimeout);
-  }, [onFinish]);
+  }, [fontReady, onFinish]);
 
   return (
     <div
       className="fixed inset-0 z-[9999] flex items-center justify-center overflow-hidden"
       style={{ backgroundColor: "#FFFFFF" }}
     >
-      {/* Grain */}
-      <div
-        className="absolute inset-0 pointer-events-none z-[1]"
-        style={{
-          opacity: 0.025,
-          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`,
-          backgroundSize: "150px",
-        }}
-      />
-
-      {/* Ambient yellow glow */}
+      {/* ── Glow — kept very faint so white bg stays pure white ── */}
       <motion.div
         className="absolute rounded-full pointer-events-none z-[2]"
         style={{
-          width: 500,
-          height: 500,
+          width: 400,
+          height: 400,
           background: "radial-gradient(circle, #FACC15 0%, transparent 70%)",
-          filter: "blur(120px)",
+          filter: "blur(140px)",
         }}
-        initial={{ opacity: 0, scale: 0.4 }}
+        initial={{ opacity: 0 }}
         animate={
           phase === "in" || phase === "hold"
-            ? { opacity: 0.18, scale: 1 }
+            ? { opacity: 0.12 }
             : phase === "center"
-              ? { opacity: 0.3, scale: 0.7 }
+              ? { opacity: 0.22 }
               : phase === "zoom"
-                ? { opacity: 0.5, scale: 2.5 }
-                : { opacity: 0, scale: 0.4 }
+                ? { opacity: 0.4 }
+                : { opacity: 0 }
         }
-        transition={{ duration: 0.9 }}
+        transition={{ duration: 0.8 }}
       />
 
-      {/* ── Letter row — all 8 letters, same font size, same font ── */}
-      <div
-        className="relative z-[20] flex items-center select-none"
-        // No padding/gap — letterSpacing handles spacing inside each span
-      >
-        {LETTERS.map((char, i) => {
-          const isO = i === O_INDEX;
-          const reverseI = LETTERS.length - 1 - i;
-
-          if (isO) {
+      {/* ── Letter row ── */}
+      {fontReady && (
+        <div className="relative z-[20] flex items-center select-none">
+          {LETTERS.map((char, i) => {
+            const isO = i === O_INDEX;
+            const reverseI = LETTERS.length - 1 - i;
+            if (isO) {
+              return (
+                <OLetter
+                  key={i}
+                  oRef={oRef}
+                  phase={phase}
+                  oOffset={oOffset}
+                  inDelay={i * LETTER_IN_STAGGER}
+                  fontSize={fontSize}
+                />
+              );
+            }
             return (
-              <OLetter
+              <NonOLetter
                 key={i}
-                oRef={oRef}
+                char={char}
                 phase={phase}
-                oOffset={oOffset}
                 inDelay={i * LETTER_IN_STAGGER}
+                outDelay={reverseI * LETTER_OUT_STAGGER}
                 fontSize={fontSize}
               />
             );
-          }
-          return (
-            <NonOLetter
-              key={i}
-              char={char}
-              phase={phase}
-              inDelay={i * LETTER_IN_STAGGER}
-              outDelay={reverseI * LETTER_OUT_STAGGER}
-              fontSize={fontSize}
-            />
-          );
-        })}
-      </div>
+          })}
+        </div>
+      )}
 
-      {/* Tagline — scales with fontSize too */}
+      {/* Tagline */}
       <motion.p
         className="absolute pointer-events-none z-[20]"
         style={{
-          bottom: "10%",
-          fontFamily: "'Barlow Condensed', 'Arial Narrow', sans-serif",
-          fontSize: Math.max(9, fontSize * 0.09),
+          bottom: "9%",
+          fontFamily: "'Bebas Neue', sans-serif",
+          fontSize: Math.max(10, fontSize * 0.1),
           letterSpacing: "0.45em",
-          color: "#000",
+          color: "#111",
+          opacity: 0.4,
           textTransform: "uppercase",
         }}
         initial={{ opacity: 0, y: 10 }}
@@ -182,7 +194,7 @@ export default function SplashScreen({ onFinish }: { onFinish: () => void }) {
         PREMIUM SOCIAL MEDIA MARKETING
       </motion.p>
 
-      {/* Yellow flood from O position */}
+      {/* Yellow flood — expands from O */}
       <motion.div
         className="absolute rounded-full pointer-events-none z-[40]"
         style={{
@@ -205,7 +217,7 @@ export default function SplashScreen({ onFinish }: { onFinish: () => void }) {
         }
       />
 
-      {/* White wash — seamless merge into main page */}
+      {/* White wash — seamlessly merges into main page */}
       <motion.div
         className="absolute inset-0 z-[45] pointer-events-none"
         style={{ backgroundColor: "#FFFFFF" }}
@@ -227,21 +239,17 @@ export default function SplashScreen({ onFinish }: { onFinish: () => void }) {
   );
 }
 
-/* ─────────────────────────────────────────────────────────────────────
-   Shared style — guarantees identical rendering for O and non-O
-───────────────────────────────────────────────────────────────────── */
-const SHARED_STYLE = (fontSize: number): React.CSSProperties => ({
-  fontFamily: "'Bebas Neue', 'Impact', 'Arial Black', sans-serif",
-  fontSize: fontSize, // JS pixel value — same on every device
+/* ── Shared font style ── */
+const letterStyle = (fontSize: number): React.CSSProperties => ({
+  fontFamily: "'Bebas Neue', sans-serif",
+  fontSize: `${fontSize}px`,
   lineHeight: 1,
   fontWeight: 400,
   letterSpacing: "0.05em",
   display: "inline-block",
 });
 
-/* ─────────────────────────────────────────────────────────────────────
-   O Letter
-───────────────────────────────────────────────────────────────────── */
+/* ── O Letter ── */
 function OLetter({
   oRef,
   phase,
@@ -255,6 +263,14 @@ function OLetter({
   inDelay: number;
   fontSize: number;
 }) {
+  const glow: Record<Phase, string> = {
+    in: "0 0 18px rgba(250,204,21,0.5), 0 0 40px rgba(250,204,21,0.2)",
+    hold: "0 0 18px rgba(250,204,21,0.5), 0 0 40px rgba(250,204,21,0.2)",
+    out: "0 0 18px rgba(250,204,21,0.5), 0 0 40px rgba(250,204,21,0.2)",
+    center: "0 0 40px rgba(250,204,21,0.9), 0 0 90px rgba(250,204,21,0.5)",
+    zoom: "0 0 60px rgba(250,204,21,1),   0 0 150px rgba(250,204,21,0.8)",
+  };
+
   const getAnimate = (): object => {
     if (phase === "in")
       return {
@@ -282,35 +298,26 @@ function OLetter({
         filter: "blur(0px)",
         transition: { duration: O_CENTER_DUR / 1000, ease: [0.76, 0, 0.24, 1] },
       };
-    if (phase === "zoom")
-      return {
-        opacity: 1,
-        x: oOffset,
-        y: 0,
-        scale: 32,
-        filter: "blur(0px)",
-        transition: { duration: O_ZOOM_DUR / 1000, ease: [0.4, 0, 0.15, 1] },
-      };
-    return {};
-  };
-
-  const glowByPhase: Record<Phase, string> = {
-    in: "0 0 20px rgba(250,204,21,0.4), 0 0 50px rgba(250,204,21,0.15)",
-    hold: "0 0 20px rgba(250,204,21,0.4), 0 0 50px rgba(250,204,21,0.15)",
-    out: "0 0 20px rgba(250,204,21,0.4), 0 0 50px rgba(250,204,21,0.15)",
-    center: "0 0 40px rgba(250,204,21,0.8), 0 0 100px rgba(250,204,21,0.4)",
-    zoom: "0 0 60px rgba(250,204,21,1),   0 0 160px rgba(250,204,21,0.7)",
+    return {
+      // zoom
+      opacity: 1,
+      x: oOffset,
+      y: 0,
+      scale: 32,
+      filter: "blur(0px)",
+      transition: { duration: O_ZOOM_DUR / 1000, ease: [0.4, 0, 0.15, 1] },
+    };
   };
 
   return (
     <motion.span
       ref={oRef}
-      initial={{ opacity: 0, x: 0, y: 75, scale: 0.4, filter: "blur(16px)" }}
+      initial={{ opacity: 0, x: 0, y: 70, scale: 0.4, filter: "blur(16px)" }}
       animate={getAnimate()}
       style={{
-        ...SHARED_STYLE(fontSize),
+        ...letterStyle(fontSize),
         color: "#FACC15",
-        textShadow: glowByPhase[phase],
+        textShadow: glow[phase],
         zIndex: 30,
       }}
     >
@@ -319,9 +326,7 @@ function OLetter({
   );
 }
 
-/* ─────────────────────────────────────────────────────────────────────
-   Non-O Letters
-───────────────────────────────────────────────────────────────────── */
+/* ── Non-O Letters ── */
 function NonOLetter({
   char,
   phase,
@@ -365,12 +370,9 @@ function NonOLetter({
 
   return (
     <motion.span
-      initial={{ opacity: 0, y: 75, scale: 0.4, filter: "blur(16px)" }}
+      initial={{ opacity: 0, y: 70, scale: 0.4, filter: "blur(16px)" }}
       animate={getAnimate()}
-      style={{
-        ...SHARED_STYLE(fontSize),
-        color: "#000000",
-      }}
+      style={{ ...letterStyle(fontSize), color: "#000000" }}
     >
       {char}
     </motion.span>
