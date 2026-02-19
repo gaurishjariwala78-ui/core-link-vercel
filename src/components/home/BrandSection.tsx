@@ -4,28 +4,40 @@ import { motion, useMotionValue, useAnimationFrame } from "framer-motion";
 // ── Brand data ────────────────────────────────────────────────────────
 const brands = [
   {
-    name: "Artham Advanced Dentistry",
+    name: "Healthcare",
     src: "/brands/Artham.png",
     color: "#FF6B00",
     shadow: "rgba(255,107,0,0.3)",
   },
   {
-    name: "The Leaders Hive",
+    name: "Recruitment",
     src: "/brands/Logo-2.png",
     color: "#C68B00",
     shadow: "rgba(198,139,0,0.3)",
   },
   {
-    name: "Ree Jewels",
+    name: "Fashion brand",
     src: "/brands/r.png",
     color: "#C9A84C",
     shadow: "rgba(201,168,76,0.3)",
   },
   {
-    name: "SK",
+    name: "Chemical Industry",
     src: "/brands/s.png",
     color: "#1A9BD7",
     shadow: "rgba(26,155,215,0.3)",
+  },
+  {
+    name: "Education",
+    src: "/brands/school.png",
+    color: "#d6911a",
+    shadow: "rgba(214,145,26,0.3)",
+  },
+  {
+    name: "Influencer",
+    src: "/brands/su.png",
+    color: "#C9A84C",
+    shadow: "rgba(201,168,76,0.3)",
   },
 ];
 
@@ -114,7 +126,7 @@ function BrandCard({
       whileHover={{ scale: 1.05, y: -2 }}
       transition={{ type: "spring", stiffness: 280, damping: 20 }}
     >
-      {/* Glow */}
+      {/* Glow — appears on hover */}
       <motion.div
         className="absolute rounded-2xl border"
         style={{ inset: 0, bottom: 30, borderRadius: 16 }}
@@ -150,19 +162,20 @@ function BrandCard({
               width: "100%",
               height: "100%",
               objectFit: "contain",
-              mixBlendMode: "multiply",
+              mixBlendMode: "multiply", // removes black backgrounds
               userSelect: "none",
             }}
             animate={{
+              // Always full color, just slight brightness boost on hover
               filter: hovered
-                ? "grayscale(0%) brightness(1) saturate(1.1)"
-                : "grayscale(80%) brightness(0.65) saturate(0.3)",
+                ? "brightness(1.05) saturate(1.15)"
+                : "brightness(1) saturate(1)",
             }}
-            transition={{ duration: 0.35 }}
+            transition={{ duration: 0.3 }}
           />
         </div>
 
-        {/* FIXED CENTERED LABEL */}
+        {/* Label — slides up on hover */}
         <motion.span
           className="text-[10px] tracking-[0.2em] uppercase font-semibold whitespace-nowrap mt-2"
           style={{ color: brand.color }}
