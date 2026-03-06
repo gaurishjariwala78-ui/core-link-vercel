@@ -39,6 +39,12 @@ const brands = [
     color: "#C9A84C",
     shadow: "rgba(201,168,76,0.3)",
   },
+  {
+    name: "Education",
+    src: "/brands/prep.png",
+    color: "#1A9BD7",
+    shadow: "rgba(26,155,215,0.3)",
+  },
 ];
 
 const track = [...brands, ...brands, ...brands];

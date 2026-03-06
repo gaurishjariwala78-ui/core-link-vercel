@@ -5,7 +5,7 @@ import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
 
-const categories = ["All", "Social Media", "Paid Ads", "Branding"];
+const categories = ["All", "Content Creator", "Education", "Healthcare", "Ads"];
 
 /* Extract YouTube ID */
 const getYouTubeId = (url: string) => {
@@ -17,97 +17,139 @@ const getYouTubeId = (url: string) => {
 const projects = [
   {
     id: 1,
-    title: "Luxury Fashion Brand",
-    category: "Social Media",
+    title: "Video 1",
+    category: "Content Creator",
     description:
       "Complete social media transformation resulting in 400% follower growth.",
     video: "https://youtube.com/shorts/wIX0fSTY11g",
   },
   {
     id: 2,
-    title: "Tech Startup Launch",
-    category: "Branding",
+    title: "Video 2",
+    category: "Education",
     description: "Strategic ad campaigns that generated 2000+ qualified leads.",
     video: "https://youtu.be/Ql6lU5_eDZw",
   },
   {
     id: 3,
-    title: "Personal Brand - CEO",
-    category: "Paid Ads",
+    title: "Video 3",
+    category: "Content Creator",
     description:
       "Built thought leadership presence reaching 500K+ monthly impressions.",
     video: "https://youtube.com/shorts/FB961hOxKDU",
   },
   {
     id: 4,
-    title: "E-commerce Growth",
-    category: "Social Media",
+    title: "Video 4",
+    category: "Ads",
     description: "ROAS-focused campaigns driving strong return.",
     video: "https://youtube.com/shorts/wAhhiOVxhDw",
   },
   {
     id: 5,
-    title: "Fitness Influencer",
-    category: "Paid Ads",
+    title: "Video 5",
+    category: "Ads",
     description: "Viral reels strategy generating millions of views monthly.",
     video: "https://www.youtube.com/shorts/QwmpyAvLdSE",
   },
 
   {
     id: 6,
-    title: "Growth Marketing Reel",
-    category: "Social Media",
+    title: "Video 6",
+    category: "Content Creator",
     description: "High-performing short-form content driving engagement.",
     video: "https://youtube.com/shorts/dYCSIX65z-A",
   },
   {
     id: 7,
-    title: "Brand Awareness Campaign",
-    category: "Social Media",
+    title: "Video 7",
+    category: "Content Creator",
     description: "Creative storytelling boosting brand visibility.",
     video: "https://youtube.com/shorts/tBl7yBf_ozA",
   },
   {
     id: 8,
-    title: "Short Form Strategy",
-    category: "Social Media",
+    title: "Video 8",
+    category: "Content Creator",
     description: "Content strategy focused on reels and shorts performance.",
     video: "https://youtube.com/shorts/uryBlv9eDm8",
   },
   {
     id: 9,
-    title: "Ad Performance Breakdown",
-    category: "Paid Ads",
+    title: "Video 9",
+    category: "Content Creator",
     description: "Performance-driven ads generating strong ROI.",
     video: "https://youtu.be/i3yfAmRXnrI",
   },
   {
     id: 10,
-    title: "Conversion Focused Content",
-    category: "Social Media",
+    title: "Video 10",
+    category: "Ads",
     description: "Short video content designed to increase conversions.",
     video: "https://youtube.com/shorts/-JPw6hI_szI",
   },
   {
     id: 11,
-    title: "Marketing Insight Reel",
-    category: "Branding",
+    title: "Video 11",
+    category: "Content Creator",
     description: "Quick insights and tips for marketing growth.",
     video: "https://youtu.be/hQhJlpVH-OE",
   },
   {
     id: 12,
-    title: "Audience Growth Strategy",
-    category: "Branding",
+    title: "Video 12",
+    category: "Ads",
     description: "Strategic video boosting audience retention and reach.",
     video: "https://youtube.com/shorts/gFhr-AEjUuc",
   },
   {
     id: 13,
-    title: "Performance Marketing Reel",
-    category: "Branding",
+    title: "Video 13",
+    category: "Ads",
     description: "High-impact short video driving reach and engagement.",
     video: "https://youtube.com/shorts/EEFh7WgtM7E",
+  },
+  {
+    id: 14,
+    title: "Video 14",
+    category: "Education",
+    description: "High-impact short video driving reach and engagement.",
+    video: "https://youtube.com/shorts/17EN0adJ3k4",
+  },
+  {
+    id: 15,
+    title: "Video 15",
+    category: "Education",
+    description: "High-impact short video driving reach and engagement.",
+    video: "https://youtube.com/shorts/r5X0GkLqpAQ",
+  },
+  {
+    id: 16,
+    title: "Video 16",
+    category: "Education",
+    description: "High-impact short video driving reach and engagement.",
+    video: "https://youtube.com/shorts/WTzs16IwEhc",
+  },
+  {
+    id: 17,
+    title: "Video 17",
+    category: "Healthcare",
+    description: "High-impact short video driving reach and engagement.",
+    video: "https://youtube.com/shorts/t-MmhHG6TDM",
+  },
+  {
+    id: 18,
+    title: "Video 18",
+    category: "Healthcare",
+    description: "High-impact short video driving reach and engagement.",
+    video: "https://youtube.com/shorts/rPYQv9uB_Xc",
+  },
+  {
+    id: 19,
+    title: "Video 19",
+    category: "Education",
+    description: "High-impact short video driving reach and engagement.",
+    video: "https://youtube.com/shorts/TzQaIgCU2O4",
   },
 ];
 
@@ -141,7 +183,6 @@ const ProjectCard = ({ project, openModal }: any) => {
             />
           )}
         </div>
-
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition flex items-end p-3">
           <span className="text-white text-xs flex items-center gap-2">
             Click to Play <ExternalLink className="w-3 h-3" />
@@ -152,7 +193,7 @@ const ProjectCard = ({ project, openModal }: any) => {
       <span className="text-[10px] text-accent uppercase">
         {project.category}
       </span>
-      <h3 className="text-sm font-semibold mt-1">{project.title}</h3>
+      {/* <h3 className="text-sm font-semibold mt-1">{project.title}</h3> */}
       <p className="text-xs text-muted-foreground">{project.description}</p>
     </div>
   );
